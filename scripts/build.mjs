@@ -1,0 +1,10 @@
+import {build} from 'vite';
+import {readFile,writeFile,readdir,copyFile} from 'node:fs/promises';
+await build();
+const files=await readdir('dist');
+const css=files.filter(f=>f.endsWith('.css'));
+const style=(await Promise.all(css.map(f=>readFile('dist/'+f,'utf8')))).join('\n');
+const js=(await readFile('dist/app.js','utf8')).replace(/<\/script/gi,'<\\/script');
+const html=`<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#142d2c"><meta name="apple-mobile-web-app-capable" content="yes"><title>Breakdown Desk</title><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./favicon.svg"><style>${style}</style></head><body><div id="root"><div style="padding:40px;font-family:Arial">Starting Breakdown Desk…</div></div><script>window.BREAKDOWN_CONFIG={supabaseUrl:'',supabaseKey:''};</script><script src="./config.js"></script><script>${js}</script></body></html>`;
+await writeFile('dist/index.html',html);await writeFile('index.html',html);await copyFile('public/config.js','config.js');
+console.log('Built standalone index.html and deployable dist/');
